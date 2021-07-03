@@ -16,7 +16,7 @@ import { UserService } from 'src/user/user.service';
 import { RegisterDto } from './dtos/register.dto';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
-import { Request, response, Response } from 'express';
+import { Request, Response } from 'express';
 import { AuthGaurd } from './auth.gaurd';
 
 @Controller('auth')
@@ -98,5 +98,30 @@ export class AuthController {
       email,
     });
     return this.userService.findOne({ id });
+  }
+  @UseGuards(AuthGaurd)
+  @Put('admin/user/password')
+  async updatePassword(
+    @Req() request: Request,
+    @Body('password') password: string,
+    @Body('password_confirm') password_confirm: string,
+  ) {
+    const cookie = await request.cookies['jwt'];
+
+    const { id } = await this.jwtService.verifyAsync(cookie);
+
+    if (password !== password_confirm) {
+      throw new BadRequestException(
+        'Password do not match',
+        'please enter a valid password btw 6- 50 chars',
+      );
+    }
+    const hashed = await bcrypt.hash(password, 12);
+    await this.userService.update(id, {
+      password: hashed,
+    });
+    return {
+      message: 'password update successful',
+    };
   }
 }
