@@ -6,6 +6,7 @@ import {
   Get,
   NotFoundException,
   Post,
+  Put,
   Req,
   Res,
   UseGuards,
@@ -15,7 +16,7 @@ import { UserService } from 'src/user/user.service';
 import { RegisterDto } from './dtos/register.dto';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
-import { Request, Response } from 'express';
+import { Request, response, Response } from 'express';
 import { AuthGaurd } from './auth.gaurd';
 
 @Controller('auth')
@@ -78,5 +79,24 @@ export class AuthController {
     return {
       message: 'successfuly logged out',
     };
+  }
+  @UseGuards(AuthGaurd)
+  @Put('admin/user/info')
+  async updateInfo(
+    @Req() request: Request,
+    @Body('first_name') first_name: string,
+    @Body('last_name') last_name: string,
+    @Body('email') email: string,
+  ) {
+    const cookie = await request.cookies['jwt'];
+
+    const { id } = await this.jwtService.verifyAsync(cookie);
+
+    await this.userService.update(id, {
+      first_name,
+      last_name,
+      email,
+    });
+    return this.userService.findOne({ id });
   }
 }
