@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { SharedModule } from 'src/shared/shared.module';
 import { UserModule } from '../user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -8,14 +9,6 @@ import { AuthService } from './auth.service';
   controllers: [AuthController],
 
   providers: [AuthService],
-  imports: [
-    UserModule,
-    JwtModule.register({
-      secret: 'Wellooccmnee',
-      signOptions: {
-        expiresIn: '3d',
-      },
-    }),
-  ],
+  imports: [UserModule, SharedModule],
 })
 export class AuthModule {}
