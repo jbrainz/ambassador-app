@@ -1,6 +1,14 @@
 import { ClassSerializerInterceptor, UseInterceptors } from '@nestjs/common';
 import { Exclude, Expose } from 'class-transformer';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Link } from 'src/link/link';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { OrderItem } from './order-item';
 
 @Entity('orders')
@@ -55,6 +63,15 @@ export class Order {
     return `${this.first_name} ${this.last_name}`;
   }
 
+  link: Link;
+
+  @ManyToOne(() => Link, (link) => link.orders, {
+    createForeignKeyConstraints: false,
+  })
+  @JoinColumn({
+    referencedColumnName: 'code',
+    name: 'code',
+  })
   @Expose()
   get total() {
     return this.order_items.reduce(
